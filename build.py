@@ -10,7 +10,7 @@ def split(a, n):
     return [a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n)]
 
 with open(INPUT_FILE, 'r') as fp:
-    lines = [l[:-1] for l in fp.readlines() if l and l[0] != '#']
+    lines = [l[:-1] for l in fp.readlines() if len(l) > 1 and l[0] != '#']
 
 lines = list(set(lines))
 random.shuffle(lines)
