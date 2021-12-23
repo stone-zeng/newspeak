@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap-reboot.min.css">
+  <title>工作报告加密器</title>
+</head>
+<style>
+  h1 { margin-bottom: 1rem; }
+  a { margin-inline: .125rem; }
+  textarea {
+    width: 100%;
+    padding: 0.125rem;
+    background-color: antiquewhite;
+    resize: vertical;
+  }
+  .container {
+    width: 100%;
+    min-width: 300px;
+    margin-inline: auto;
+    margin-block: 1rem;
+    padding-inline: 1rem;
+  }
+  @media (min-width:  576px) { .container { max-width:  540px; } }
+  @media (min-width:  768px) { .container { max-width:  720px; } }
+  @media (min-width: 1200px) { .container { max-width: 1140px; } }
+  .input {
+    height: 10rem;
+    margin-bottom: 1rem;
+  }
+  .output {
+    height: 20rem;
+  }
+</style>
+
+<body>
+  <div class="container">
+    <h1>工作报告加密器</h1>
+    <p>使用<a href="http://www.gov.cn/guowuyuan/zfgzbg.htm" target="_blank">政府工作报告</a>对文本进行加密。</p>
+    <h2><label for="input">加密 🔒</label></h2>
+    <textarea name="input" id="input" class="input" placeholder="输入需加密的内容"></textarea>
+    <h2><label for="output">解密 🔓</label></h2>
+    <textarea name="output" id="output" class="output" placeholder="也可输入需解密的内容"></textarea>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/lzutf8/build/production/lzutf8.min.js"></script>
+  <script src="/data.js"></script>
+  <script>
+    const randomChoice = (arr) => arr[Math.floor(arr.length * Math.random())];
+    const encrypt = (s) => {
+      const compressed = LZUTF8.compress(s, { outputEncoding: "Base64" });
+      return [...compressed]
+        .map((c) => randomChoice(data.encryption[c]))
+        .join("");
+    };
+    const decrypt = (s) => {
+      try {
+        const sep = "。";
+        const x = s.split(sep).map((i) => {
+          if (i !== "") {
+            const d = data.decryption[i + sep];
+            if (d === undefined) { throw new Error("Not found!"); }
+            return d;
+          }
+          return "";
+        }).join("");
+        return LZUTF8.decompress(x, { inputEncoding: "Base64" });
+      } catch (err) {
+        console.log(err);
+        return "";
+      }
+    };
+    const input = document.querySelector("#input");
+    const output = document.querySelector("#output");
+    input.addEventListener("input", (e) => {
+      input.placeholder = "输入需加密的内容";
+      output.value = encrypt(e.target.value);
+    });
+    output.addEventListener("input", (e) => {
+      const res = decrypt(e.target.value);
+      input.value = res;
+      if (e.target.value !== "" && res === "") { input.placeholder = "无效内容！"; }
+    });
+  </script>
+</body>
+
+</html>
